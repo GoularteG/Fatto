@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface TarefaRepository extends JpaRepository<Tarefas, Long > {
 
     Optional<Tarefas> findByOrdemApresentacao(int ordemApresentacao);
+
+    Optional<Tarefas> findTopByOrderByOrdemApresentacaoDesc();
 }

@@ -8,6 +8,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("tarefas")
 public class TarefasController {
@@ -16,46 +18,12 @@ public class TarefasController {
     private TarefaRepository repository;
 
 
-    @GetMapping("/tarefas")
+    @GetMapping
     public ResponseEntity<Page<DadosListagemTarefas>> listar(@PageableDefault(size = 10,sort = {"ordemApresentacao"}) Pageable paginacao){
         var p= repository.findAll(paginacao).map(DadosListagemTarefas::new);
         return ResponseEntity.ok(p);
     }
 
-    @PutMapping("/{id}/subir")
-    public ResponseEntity<DadosDetalhamentoTarefa> subirTarefa(@PathVariable Long id) {
-        var tarefa = repository.getReferenceById(id);
-        if (tarefa.getOrdemApresentacao() > 1) {
-            int novaOrdem = tarefa.getOrdemApresentacao() - 1;
-
-            repository.findByOrdemApresentacao(novaOrdem).ifPresent(t -> {
-                t.setOrdemApresentacao(t.getOrdemApresentacao() + 1);
-                repository.save(t);
-            });
-
-            tarefa.setOrdemApresentacao(novaOrdem);
-            repository.save(tarefa);
-        }
-        return ResponseEntity.ok(new DadosDetalhamentoTarefa(tarefa));
-    }
-
-    @PutMapping("/{id}/descer")
-    public ResponseEntity<DadosDetalhamentoTarefa> descerTarefa(@PathVariable Long id) {
-        var tarefa = repository.getReferenceById(id);
-        int totalTarefas = (int) repository.count();
-        if (tarefa.getOrdemApresentacao() < totalTarefas) {
-            int novaOrdem = tarefa.getOrdemApresentacao() + 1;
-
-            repository.findByOrdemApresentacao(novaOrdem).ifPresent(t -> {
-                t.setOrdemApresentacao(t.getOrdemApresentacao() - 1);
-                repository.save(t);
-            });
-
-            tarefa.setOrdemApresentacao(novaOrdem);
-            repository.save(tarefa);
-        }
-        return ResponseEntity.ok(new DadosDetalhamentoTarefa(tarefa));
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity excluirTarefa(@PathVariable Long id) {
@@ -66,20 +34,25 @@ public class TarefasController {
 
     @PutMapping("/{id}")
     public ResponseEntity atualizarTarefa( @RequestBody DadosAtualizacaoTarefas dadosAtualizacaoTarefas) {
-        var tarefa = repository.getReferenceById(dadosAtualizacaoTarefas.id());
+        var tarefa = repository.findById(dadosAtualizacaoTarefas.id()).orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));;
         tarefa.atualizarTarefa(dadosAtualizacaoTarefas);
-
+        repository.save(tarefa);
         return ResponseEntity.ok(new DadosDetalhamentoTarefa(tarefa));
     }
 
 
-    @PostMapping("/tarefas")
+    @PostMapping
     public ResponseEntity<DadosDetalhamentoTarefa> criarTarefa(@RequestBody DadosCadastroTarefa dados) {
-        var tarefaCriada= new Tarefas(dados);
+        int maiorOrdem = repository.findTopByOrderByOrdemApresentacaoDesc()
+                .map(Tarefas::getOrdemApresentacao)
+                .orElse(0);
+        var tarefaCriada = new Tarefas(dados);
+        tarefaCriada.setOrdemApresentacao(maiorOrdem + 1);
         repository.save(tarefaCriada);
 
         return ResponseEntity.ok(new DadosDetalhamentoTarefa(tarefaCriada));
     }
+
 
 
 }
