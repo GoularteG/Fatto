@@ -38,9 +38,6 @@ A tabela **Tarefas** possui os seguintes campos:
    - Endpoint para excluir uma tarefa.
    - Ao excluir, a tarefa é removida permanentemente do banco de dados.
 
-5. **Reordenação de Tarefas** (não implementado diretamente no back-end, mas a lógica está disponível para ser usada no front-end)
-   - Permite que a ordem de apresentação das tarefas seja alterada, ajustando o campo **Ordem de Apresentação**.
-
 ## Tecnologias Utilizadas
 
 - **Java 17**
