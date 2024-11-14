@@ -32,7 +32,7 @@ A tabela **Tarefas** possui os seguintes campos:
 3. **Editar Tarefa** (`PUT /tarefas/{id}`)
    - Endpoint para editar uma tarefa existente.
    - Campos editáveis: **Nome da Tarefa**, **Custo** e **Data Limite**.
-   - Verificação de unicidade do nome da tarefa: não pode haver duas tarefas com o mesmo nome.
+
 
 4. **Excluir Tarefa** (`DELETE /tarefas/{id}`)
    - Endpoint para excluir uma tarefa.
